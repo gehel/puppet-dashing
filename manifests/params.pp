@@ -81,7 +81,7 @@ class dashing::params {
     default => '/var/log/dashing/dashing.log',
   }
 
-  $port = '42'
+  $port = '3030'
   $protocol = 'tcp'
 
   # General Settings

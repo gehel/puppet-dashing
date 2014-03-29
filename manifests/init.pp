@@ -200,62 +200,62 @@
 # See README for usage patterns.
 #
 class dashing (
-  $my_class            = params_lookup( 'my_class' ),
-  $source              = params_lookup( 'source' ),
-  $source_dir          = params_lookup( 'source_dir' ),
-  $source_dir_purge    = params_lookup( 'source_dir_purge' ),
-  $template            = params_lookup( 'template' ),
-  $service_autorestart = params_lookup( 'service_autorestart' , 'global' ),
-  $options             = params_lookup( 'options' ),
-  $version             = params_lookup( 'version' ),
-  $absent              = params_lookup( 'absent' ),
-  $disable             = params_lookup( 'disable' ),
-  $disableboot         = params_lookup( 'disableboot' ),
-  $monitor             = params_lookup( 'monitor' , 'global' ),
-  $monitor_tool        = params_lookup( 'monitor_tool' , 'global' ),
-  $monitor_target      = params_lookup( 'monitor_target' , 'global' ),
-  $puppi               = params_lookup( 'puppi' , 'global' ),
-  $puppi_helper        = params_lookup( 'puppi_helper' , 'global' ),
-  $firewall            = params_lookup( 'firewall' , 'global' ),
-  $firewall_tool       = params_lookup( 'firewall_tool' , 'global' ),
-  $firewall_src        = params_lookup( 'firewall_src' , 'global' ),
-  $firewall_dst        = params_lookup( 'firewall_dst' , 'global' ),
-  $debug               = params_lookup( 'debug' , 'global' ),
-  $audit_only          = params_lookup( 'audit_only' , 'global' ),
-  $noops               = params_lookup( 'noops' ),
-  $package             = params_lookup( 'package' ),
-  $service             = params_lookup( 'service' ),
-  $service_status      = params_lookup( 'service_status' ),
-  $process             = params_lookup( 'process' ),
-  $process_args        = params_lookup( 'process_args' ),
-  $process_user        = params_lookup( 'process_user' ),
-  $config_dir          = params_lookup( 'config_dir' ),
-  $config_file         = params_lookup( 'config_file' ),
-  $config_file_mode    = params_lookup( 'config_file_mode' ),
-  $config_file_owner   = params_lookup( 'config_file_owner' ),
-  $config_file_group   = params_lookup( 'config_file_group' ),
-  $config_file_init    = params_lookup( 'config_file_init' ),
-  $pid_file            = params_lookup( 'pid_file' ),
-  $data_dir            = params_lookup( 'data_dir' ),
-  $log_dir             = params_lookup( 'log_dir' ),
-  $log_file            = params_lookup( 'log_file' ),
-  $port                = params_lookup( 'port' ),
-  $protocol            = params_lookup( 'protocol' )
-  ) inherits dashing::params {
+  $my_class            = params_lookup('my_class'),
+  $source              = params_lookup('source'),
+  $source_dir          = params_lookup('source_dir'),
+  $source_dir_purge    = params_lookup('source_dir_purge'),
+  $template            = params_lookup('template'),
+  $service_autorestart = params_lookup('service_autorestart', 'global'),
+  $options             = params_lookup('options'),
+  $version             = params_lookup('version'),
+  $absent              = params_lookup('absent'),
+  $disable             = params_lookup('disable'),
+  $disableboot         = params_lookup('disableboot'),
+  $monitor             = params_lookup('monitor', 'global'),
+  $monitor_tool        = params_lookup('monitor_tool', 'global'),
+  $monitor_target      = params_lookup('monitor_target', 'global'),
+  $puppi               = params_lookup('puppi', 'global'),
+  $puppi_helper        = params_lookup('puppi_helper', 'global'),
+  $firewall            = params_lookup('firewall', 'global'),
+  $firewall_tool       = params_lookup('firewall_tool', 'global'),
+  $firewall_src        = params_lookup('firewall_src', 'global'),
+  $firewall_dst        = params_lookup('firewall_dst', 'global'),
+  $debug               = params_lookup('debug', 'global'),
+  $audit_only          = params_lookup('audit_only', 'global'),
+  $noops               = params_lookup('noops'),
+  $package             = params_lookup('package'),
+  $service             = params_lookup('service'),
+  $service_status      = params_lookup('service_status'),
+  $process             = params_lookup('process'),
+  $process_args        = params_lookup('process_args'),
+  $process_user        = params_lookup('process_user'),
+  $config_dir          = params_lookup('config_dir'),
+  $config_file         = params_lookup('config_file'),
+  $config_file_mode    = params_lookup('config_file_mode'),
+  $config_file_owner   = params_lookup('config_file_owner'),
+  $config_file_group   = params_lookup('config_file_group'),
+  $config_file_init    = params_lookup('config_file_init'),
+  $pid_file            = params_lookup('pid_file'),
+  $data_dir            = params_lookup('data_dir'),
+  $log_dir             = params_lookup('log_dir'),
+  $log_file            = params_lookup('log_file'),
+  $port                = params_lookup('port'),
+  $protocol            = params_lookup('protocol')) inherits dashing::params {
+  $bool_source_dir_purge = any2bool($source_dir_purge)
+  $bool_service_autorestart = any2bool($service_autorestart)
+  $bool_absent = any2bool($absent)
+  $bool_disable = any2bool($disable)
+  $bool_disableboot = any2bool($disableboot)
+  $bool_monitor = any2bool($monitor)
+  $bool_puppi = any2bool($puppi)
+  $bool_firewall = any2bool($firewall)
+  $bool_debug = any2bool($debug)
+  $bool_audit_only = any2bool($audit_only)
+  $bool_noops = any2bool($noops)
 
-  $bool_source_dir_purge=any2bool($source_dir_purge)
-  $bool_service_autorestart=any2bool($service_autorestart)
-  $bool_absent=any2bool($absent)
-  $bool_disable=any2bool($disable)
-  $bool_disableboot=any2bool($disableboot)
-  $bool_monitor=any2bool($monitor)
-  $bool_puppi=any2bool($puppi)
-  $bool_firewall=any2bool($firewall)
-  $bool_debug=any2bool($debug)
-  $bool_audit_only=any2bool($audit_only)
-  $bool_noops=any2bool($noops)
+  require nodejs
 
-  ### Definition of some variables used in the module
+  # ## Definition of some variables used in the module
   $manage_package = $dashing::bool_absent ? {
     true  => 'absent',
     false => $dashing::version,
@@ -274,15 +274,15 @@ class dashing (
 
   $manage_service_ensure = $dashing::bool_disable ? {
     true    => 'stopped',
-    default =>  $dashing::bool_absent ? {
+    default => $dashing::bool_absent ? {
       true    => 'stopped',
       default => 'running',
     },
   }
 
   $manage_service_autorestart = $dashing::bool_service_autorestart ? {
-    true    => Service[dashing],
-    false   => undef,
+    true  => Service[dashing],
+    false => undef,
   }
 
   $manage_file = $dashing::bool_absent ? {
@@ -290,16 +290,13 @@ class dashing (
     default => 'present',
   }
 
-  if $dashing::bool_absent == true
-  or $dashing::bool_disable == true
-  or $dashing::bool_disableboot == true {
+  if $dashing::bool_absent == true or $dashing::bool_disable == true or $dashing::bool_disableboot == true {
     $manage_monitor = false
   } else {
     $manage_monitor = true
   }
 
-  if $dashing::bool_absent == true
-  or $dashing::bool_disable == true {
+  if $dashing::bool_absent == true or $dashing::bool_disable == true {
     $manage_firewall = false
   } else {
     $manage_firewall = true
@@ -316,29 +313,30 @@ class dashing (
   }
 
   $manage_file_source = $dashing::source ? {
-    ''        => undef,
-    default   => $dashing::source,
+    ''      => undef,
+    default => $dashing::source,
   }
 
   $manage_file_content = $dashing::template ? {
-    ''        => undef,
-    default   => template($dashing::template),
+    ''      => undef,
+    default => template($dashing::template),
   }
 
-  ### Managed resources
+  # ## Managed resources
   package { $dashing::package:
-    ensure  => $dashing::manage_package,
-    noop    => $dashing::bool_noops,
+    ensure   => $dashing::manage_package,
+    provider => 'gem',
+    noop     => $dashing::bool_noops,
   }
 
   service { 'dashing':
-    ensure     => $dashing::manage_service_ensure,
-    name       => $dashing::service,
-    enable     => $dashing::manage_service_enable,
-    hasstatus  => $dashing::service_status,
-    pattern    => $dashing::process,
-    require    => Package[$dashing::package],
-    noop       => $dashing::bool_noops,
+    ensure    => $dashing::manage_service_ensure,
+    name      => $dashing::service,
+    enable    => $dashing::manage_service_enable,
+    hasstatus => $dashing::service_status,
+    pattern   => $dashing::process,
+    require   => Package[$dashing::package],
+    noop      => $dashing::bool_noops,
   }
 
   file { 'dashing.conf':
@@ -373,16 +371,15 @@ class dashing (
     }
   }
 
-
-  ### Include custom class if $my_class is set
+  # ## Include custom class if $my_class is set
   if $dashing::my_class {
     include $dashing::my_class
   }
 
-
-  ### Provide puppi data, if enabled ( puppi => true )
+  # ## Provide puppi data, if enabled ( puppi => true )
   if $dashing::bool_puppi == true {
-    $classvars=get_class_args()
+    $classvars = get_class_args()
+
     puppi::ze { 'dashing':
       ensure    => $dashing::manage_file,
       variables => $classvars,
@@ -391,8 +388,7 @@ class dashing (
     }
   }
 
-
-  ### Service monitoring, if enabled ( monitor => true )
+  # ## Service monitoring, if enabled ( monitor => true )
   if $dashing::bool_monitor == true {
     if $dashing::port != '' {
       monitor::port { "dashing_${dashing::protocol}_${dashing::port}":
@@ -404,6 +400,7 @@ class dashing (
         noop     => $dashing::bool_noops,
       }
     }
+
     if $dashing::service != '' {
       monitor::process { 'dashing_process':
         process  => $dashing::process,
@@ -418,8 +415,7 @@ class dashing (
     }
   }
 
-
-  ### Firewall management, if enabled ( firewall => true )
+  # ## Firewall management, if enabled ( firewall => true )
   if $dashing::bool_firewall == true and $dashing::port != '' {
     firewall { "dashing_${dashing::protocol}_${dashing::port}":
       source      => $dashing::firewall_src,
@@ -434,8 +430,7 @@ class dashing (
     }
   }
 
-
-  ### Debugging, if enabled ( debug => true )
+  # ## Debugging, if enabled ( debug => true )
   if $dashing::bool_debug == true {
     file { 'debug_dashing':
       ensure  => $dashing::manage_file,
@@ -443,7 +438,8 @@ class dashing (
       mode    => '0640',
       owner   => 'root',
       group   => 'root',
-      content => inline_template('<%= scope.to_hash.reject { |k,v| k.to_s =~ /(uptime.*|path|timestamp|free|.*password.*|.*psk.*|.*key)/ }.to_yaml %>'),
+      content => inline_template('<%= scope.to_hash.reject { |k,v| k.to_s =~ /(uptime.*|path|timestamp|free|.*password.*|.*psk.*|.*key)/ }.to_yaml %>'
+      ),
       noop    => $dashing::bool_noops,
     }
   }
