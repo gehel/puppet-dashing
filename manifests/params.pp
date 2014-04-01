@@ -13,8 +13,7 @@
 # It may be imported or inherited by other classes
 #
 class dashing::params {
-
-  ### Application related parameters
+  # ## Application related parameters
 
   $package = $::operatingsystem ? {
     default => 'dashing',
@@ -29,14 +28,18 @@ class dashing::params {
   }
 
   $process = $::operatingsystem ? {
-    default => 'dashing',
+    default => 'thin',
   }
 
   $process_args = $::operatingsystem ? {
-    default => '',
+    default => 'dashing',
   }
 
   $process_user = $::operatingsystem ? {
+    default => 'dashing',
+  }
+
+  $process_group = $::operatingsystem ? {
     default => 'dashing',
   }
 
@@ -65,12 +68,28 @@ class dashing::params {
     default                   => '/etc/sysconfig/dashing',
   }
 
+  $config_file_init_source = undef
+
+  $config_file_init_template = $::operatingsystem ? {
+    default => 'dashing/config-init.erb',
+  }
+
+  $config_file_init_script_source = undef
+
+  $config_file_init_script = $::operatingsystem ? {
+    default => '/etc/init.d/dashing'
+  }
+  
+  $config_file_init_script_template =$::operatingsystem ? {
+    default => 'dashing/init-script.erb'
+  }
+
   $pid_file = $::operatingsystem ? {
     default => '/var/run/dashing.pid',
   }
 
   $data_dir = $::operatingsystem ? {
-    default => '/etc/dashing',
+    default => '/var/lib/dashing',
   }
 
   $log_dir = $::operatingsystem ? {
@@ -83,6 +102,9 @@ class dashing::params {
 
   $port = '3030'
   $protocol = 'tcp'
+  $dashboard_git_url = undef
+  $dashboard_git_branch = 'master'
+  $dashboard_refresh_cron = '*/5 * * * *'
 
   # General Settings
   $my_class = ''
@@ -97,7 +119,7 @@ class dashing::params {
   $disable = false
   $disableboot = false
 
-  ### General module variables that can have a site or per module default
+  # ## General module variables that can have a site or per module default
   $monitor = false
   $monitor_tool = ''
   $monitor_target = $::ipaddress

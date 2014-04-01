@@ -200,47 +200,56 @@
 # See README for usage patterns.
 #
 class dashing (
-  $my_class            = params_lookup('my_class'),
-  $source              = params_lookup('source'),
-  $source_dir          = params_lookup('source_dir'),
-  $source_dir_purge    = params_lookup('source_dir_purge'),
-  $template            = params_lookup('template'),
-  $service_autorestart = params_lookup('service_autorestart', 'global'),
-  $options             = params_lookup('options'),
-  $version             = params_lookup('version'),
-  $absent              = params_lookup('absent'),
-  $disable             = params_lookup('disable'),
-  $disableboot         = params_lookup('disableboot'),
-  $monitor             = params_lookup('monitor', 'global'),
-  $monitor_tool        = params_lookup('monitor_tool', 'global'),
-  $monitor_target      = params_lookup('monitor_target', 'global'),
-  $puppi               = params_lookup('puppi', 'global'),
-  $puppi_helper        = params_lookup('puppi_helper', 'global'),
-  $firewall            = params_lookup('firewall', 'global'),
-  $firewall_tool       = params_lookup('firewall_tool', 'global'),
-  $firewall_src        = params_lookup('firewall_src', 'global'),
-  $firewall_dst        = params_lookup('firewall_dst', 'global'),
-  $debug               = params_lookup('debug', 'global'),
-  $audit_only          = params_lookup('audit_only', 'global'),
-  $noops               = params_lookup('noops'),
-  $package             = params_lookup('package'),
-  $service             = params_lookup('service'),
-  $service_status      = params_lookup('service_status'),
-  $process             = params_lookup('process'),
-  $process_args        = params_lookup('process_args'),
-  $process_user        = params_lookup('process_user'),
-  $config_dir          = params_lookup('config_dir'),
-  $config_file         = params_lookup('config_file'),
-  $config_file_mode    = params_lookup('config_file_mode'),
-  $config_file_owner   = params_lookup('config_file_owner'),
-  $config_file_group   = params_lookup('config_file_group'),
-  $config_file_init    = params_lookup('config_file_init'),
-  $pid_file            = params_lookup('pid_file'),
-  $data_dir            = params_lookup('data_dir'),
-  $log_dir             = params_lookup('log_dir'),
-  $log_file            = params_lookup('log_file'),
-  $port                = params_lookup('port'),
-  $protocol            = params_lookup('protocol')) inherits dashing::params {
+  $my_class       = params_lookup('my_class'),
+  $source         = params_lookup('source'),
+  $source_dir     = params_lookup('source_dir'),
+  $source_dir_purge                 = params_lookup('source_dir_purge'),
+  $template       = params_lookup('template'),
+  $service_autorestart              = params_lookup('service_autorestart', 'global'),
+  $options        = params_lookup('options'),
+  $version        = params_lookup('version'),
+  $absent         = params_lookup('absent'),
+  $disable        = params_lookup('disable'),
+  $disableboot    = params_lookup('disableboot'),
+  $monitor        = params_lookup('monitor', 'global'),
+  $monitor_tool   = params_lookup('monitor_tool', 'global'),
+  $monitor_target = params_lookup('monitor_target', 'global'),
+  $puppi          = params_lookup('puppi', 'global'),
+  $puppi_helper   = params_lookup('puppi_helper', 'global'),
+  $firewall       = params_lookup('firewall', 'global'),
+  $firewall_tool  = params_lookup('firewall_tool', 'global'),
+  $firewall_src   = params_lookup('firewall_src', 'global'),
+  $firewall_dst   = params_lookup('firewall_dst', 'global'),
+  $debug          = params_lookup('debug', 'global'),
+  $audit_only     = params_lookup('audit_only', 'global'),
+  $noops          = params_lookup('noops'),
+  $package        = params_lookup('package'),
+  $service        = params_lookup('service'),
+  $service_status = params_lookup('service_status'),
+  $process        = params_lookup('process'),
+  $process_args   = params_lookup('process_args'),
+  $process_user   = params_lookup('process_user'),
+  $process_group  = params_lookup('process_group'),
+  $config_dir     = params_lookup('config_dir'),
+  $config_file    = params_lookup('config_file'),
+  $config_file_mode                 = params_lookup('config_file_mode'),
+  $config_file_owner                = params_lookup('config_file_owner'),
+  $config_file_group                = params_lookup('config_file_group'),
+  $config_file_init                 = params_lookup('config_file_init'),
+  $config_file_init_source          = params_lookup('config_file_init_source'),
+  $config_file_init_template        = params_lookup('config_file_init_template'),
+  $config_file_init_script          = params_lookup('config_file_init_script'),
+  $config_file_init_script_source   = params_lookup('config_file_init_script_source'),
+  $config_file_init_script_template = params_lookup('config_file_init_script_template'),
+  $pid_file       = params_lookup('pid_file'),
+  $data_dir       = params_lookup('data_dir'),
+  $log_dir        = params_lookup('log_dir'),
+  $log_file       = params_lookup('log_file'),
+  $port           = params_lookup('port'),
+  $protocol       = params_lookup('protocol'),
+  $dashboard_git_url                = params_lookup('dashboard_git_url'),
+  $dashboard_git_branch             = params_lookup('dashboard_git_branch'),
+  $dashboard_refresh_cron           = params_lookup('dashboard_refresh_cron'),) inherits dashing::params {
   $bool_source_dir_purge = any2bool($source_dir_purge)
   $bool_service_autorestart = any2bool($service_autorestart)
   $bool_absent = any2bool($absent)
@@ -290,6 +299,21 @@ class dashing (
     default => 'present',
   }
 
+  $manage_directory = $dashing::bool_absent ? {
+    true    => 'absent',
+    default => 'directory',
+  }
+
+  $manage_user = $dashing::bool_absent ? {
+    true    => 'absent',
+    default => 'present',
+  }
+
+  $manage_group = $dashing::bool_absent ? {
+    true    => 'absent',
+    default => 'present',
+  }
+
   if $dashing::bool_absent == true or $dashing::bool_disable == true or $dashing::bool_disableboot == true {
     $manage_monitor = false
   } else {
@@ -322,11 +346,85 @@ class dashing (
     default => template($dashing::template),
   }
 
+  $manage_config_file_init_source = $dashing::config_file_init_source ? {
+    ''      => undef,
+    default => $dashing::config_file_init_source,
+  }
+
+  $manage_config_file_init_content = $dashing::config_file_init_template ? {
+    ''      => undef,
+    default => template($dashing::config_file_init_template),
+  }
+
+  $manage_config_file_init_script_source = $dashing::config_file_init_script_source ? {
+    ''      => undef,
+    default => $dashing::config_file_init_script_source,
+  }
+
+  $manage_config_file_init_script_content = $dashing::config_file_init_script_template ? {
+    ''      => undef,
+    default => template($dashing::config_file_init_script_template),
+  }
+
   # ## Managed resources
   package { $dashing::package:
     ensure   => $dashing::manage_package,
     provider => 'gem',
     noop     => $dashing::bool_noops,
+  }
+
+  file { 'dashing.default':
+    ensure  => $dashing::manage_file,
+    path    => $dashing::config_file_init,
+    mode    => $dashing::config_file_mode,
+    owner   => $dashing::config_file_owner,
+    group   => $dashing::config_file_group,
+    require => Package[$dashing::package],
+    notify  => $dashing::manage_service_autorestart,
+    source  => $dashing::manage_config_file_init_source,
+    content => $dashing::manage_config_file_init_content,
+    replace => $dashing::manage_file_replace,
+    audit   => $dashing::manage_audit,
+    noop    => $dashing::bool_noops,
+  }
+
+  file { 'dashing.init-script':
+    ensure  => $dashing::manage_file,
+    path    => $dashing::config_file_init_script,
+    mode    => '0755',
+    owner   => $dashing::config_file_owner,
+    group   => $dashing::config_file_group,
+    require => Package[$dashing::package],
+    notify  => $dashing::manage_service_autorestart,
+    source  => $dashing::manage_config_file_init_script_source,
+    content => $dashing::manage_config_file_init_script_content,
+    replace => $dashing::manage_file_replace,
+    audit   => $dashing::manage_audit,
+    noop    => $dashing::bool_noops,
+  }
+
+  git::reposync { 'dashing.data.dir':
+    ensure            => $dashing::manage_file,
+    source_url        => $dashing::dashboard_git_url,
+    branch            => $dashing::dashboard_git_branch,
+    destination_dir   => $dashing::data_dir,
+    owner             => $dashing::process_user,
+    group             => $dashing::process_group,
+    execute_on_change => true,
+    cron              => $dashing::dashboard_refresh_cron,
+    post_command      => "cd $dashing::data_dir && /usr/bin/bundle",
+    notify            => $dashing::manage_service_autorestart,
+  }
+
+  group { $dashing::process_group: ensure => $dashing::manage_group, }
+
+  user { $dashing::process_user:
+    ensure => $dashing::manage_user,
+    gid    => $dashing::process_group,
+    home   => $dashing::data_dir,
+    shell  => '/bin/false',
+    audit  => $dashing::manage_audit,
+    noop   => $dashing::bool_noops,
   }
 
   service { 'dashing':
@@ -335,24 +433,29 @@ class dashing (
     enable    => $dashing::manage_service_enable,
     hasstatus => $dashing::service_status,
     pattern   => $dashing::process,
-    require   => Package[$dashing::package],
+    require   => [
+      Package[$dashing::package],
+      File['dashing.default'],
+      File['dashing.init-script'],
+      Git::Reposync['dashing.data.dir'],
+      ],
     noop      => $dashing::bool_noops,
   }
 
-  file { 'dashing.conf':
-    ensure  => $dashing::manage_file,
-    path    => $dashing::config_file,
-    mode    => $dashing::config_file_mode,
-    owner   => $dashing::config_file_owner,
-    group   => $dashing::config_file_group,
-    require => Package[$dashing::package],
-    notify  => $dashing::manage_service_autorestart,
-    source  => $dashing::manage_file_source,
-    content => $dashing::manage_file_content,
-    replace => $dashing::manage_file_replace,
-    audit   => $dashing::manage_audit,
-    noop    => $dashing::bool_noops,
-  }
+  #  file { 'dashing.conf':
+  #    ensure  => $dashing::manage_file,
+  #    path    => $dashing::config_file,
+  #    mode    => $dashing::config_file_mode,
+  #    owner   => $dashing::config_file_owner,
+  #    group   => $dashing::config_file_group,
+  #    require => Package[$dashing::package],
+  #    notify  => $dashing::manage_service_autorestart,
+  #    source  => $dashing::manage_file_source,
+  #    content => $dashing::manage_file_content,
+  #    replace => $dashing::manage_file_replace,
+  #    audit   => $dashing::manage_audit,
+  #    noop    => $dashing::bool_noops,
+  #  }
 
   # The whole dashing configuration directory can be recursively overriden
   if $dashing::source_dir {
