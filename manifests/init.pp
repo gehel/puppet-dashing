@@ -241,6 +241,7 @@ class dashing (
   $config_file_init_script          = params_lookup('config_file_init_script'),
   $config_file_init_script_source   = params_lookup('config_file_init_script_source'),
   $config_file_init_script_template = params_lookup('config_file_init_script_template'),
+  $pid_dir        = params_lookup('pid_dir'),
   $pid_file       = params_lookup('pid_file'),
   $data_dir       = params_lookup('data_dir'),
   $log_dir        = params_lookup('log_dir'),
@@ -403,6 +404,17 @@ class dashing (
     noop    => $dashing::bool_noops,
   }
 
+  file { 'dashing.pid-dir':
+    ensure  => $dashing::manage_directory,
+    path    => $dashing::pid_dir,
+    mode    => '0755',
+    owner   => $dashing::process_user,
+    group   => $dashing::process_group,
+    require => Package[$dashing::package],
+    audit   => $dashing::manage_audit,
+    noop    => $dashing::bool_noops,
+  }
+
   git::reposync { 'dashing.data.dir':
     ensure            => $dashing::manage_file,
     source_url        => $dashing::dashboard_git_url,
@@ -412,7 +424,7 @@ class dashing (
     group             => $dashing::process_group,
     execute_on_change => true,
     cron              => $dashing::dashboard_refresh_cron,
-    post_command      => "cd $dashing::data_dir && /usr/bin/bundle",
+    post_command      => "cd ${dashing::data_dir} && chown -R ${dashing::process_user}:${$dashing::process_group} *  && /usr/bin/bundle",
     notify            => $dashing::manage_service_autorestart,
   }
 
@@ -437,6 +449,7 @@ class dashing (
       Package[$dashing::package],
       File['dashing.default'],
       File['dashing.init-script'],
+      File['dashing.pid-dir'],
       Git::Reposync['dashing.data.dir'],
       ],
     noop      => $dashing::bool_noops,

@@ -84,8 +84,12 @@ class dashing::params {
     default => 'dashing/init-script.erb'
   }
 
+  $pid_dir = $::operatingsystem ? {
+    default => '/var/run/dashing',
+  }
+
   $pid_file = $::operatingsystem ? {
-    default => '/var/run/dashing.pid',
+    default => '/var/run/dashing/dashing.pid',
   }
 
   $data_dir = $::operatingsystem ? {
