@@ -424,7 +424,7 @@ class dashing (
     group             => $dashing::process_group,
     execute_on_change => true,
     cron              => $dashing::dashboard_refresh_cron,
-    post_command      => "cd ${dashing::data_dir} && chown -R ${dashing::process_user}:${$dashing::process_group} ${dashing::data_dir}  && /usr/bin/bundle",
+    post_command      => "cd ${dashing::data_dir} && /usr/bin/bundle && chown -R ${dashing::process_user}:${$dashing::process_group} ${dashing::data_dir}",
     notify            => $dashing::manage_service_autorestart,
   }
 
